@@ -11,6 +11,14 @@ const registerUser = async (user) => {
   return userCreated;
 };
 
+const getAllUsers = async () => {
+  const users = await User.findAll({
+    attributes: { exclude: ['password'] },
+  });
+  return users;
+};
+
 module.exports = {
   registerUser,
+  getAllUsers,
 };
