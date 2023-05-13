@@ -20,6 +20,7 @@ app.get('/teste', tokenValidation.checkToken, (req, res) => {
 app.post('/login', loginValidation.mandatoryFields, loginController.login);
 app.post('/user', userValidation.mandatoryFields, userController.registerUser);
 app.get('/user', tokenValidation.checkToken, userController.getAllUsers);
+app.get('/user/:id', tokenValidation.checkToken, userController.getUserById);
 
 // É importante exportar a constante `app`,
 // para que possa ser utilizada pelo arquivo `src/server.js`
