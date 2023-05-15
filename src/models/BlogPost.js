@@ -29,8 +29,8 @@ module.exports = (sequelize, DataTypes) => {
       },
     },
     {
-      timestamps: true,
-      tableName: 'Blog_posts',
+      timestamps: false,
+      tableName: 'blog_posts',
       underscored: true,
     }
   );
@@ -39,6 +39,12 @@ module.exports = (sequelize, DataTypes) => {
     BlogPost.belongsTo(models.User, {
       foreignKey: 'userId',
       as: 'user',
+    });
+    BlogPost.belongsToMany(models.Category, {
+      as: 'categories',
+      through: models.PostCategory,
+      foreignKey: 'postId',
+      otherKey: 'categoryId',
     });
   };
 
