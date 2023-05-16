@@ -1,5 +1,5 @@
 const { userServices } = require('../services');
-const generateToken = require('../jwt/generate.token');
+const { generateToken, verifyToken } = require('../auth/generate.token');
 
 const registerUser = async (req, res) => {
   const { email, password, displayName, image } = req.body;
@@ -29,8 +29,23 @@ const getUserById = async (req, res) => {
   res.status(200).json(user);
 };
 
+const deleteUser = async (req, res) => {
+  const { authorization } = req.headers;
+
+  const { userId } = verifyToken(authorization).data;
+
+  const user = await userServices.deleteUser(userId);
+
+  if (!user) {
+    return res.status(404).json({ message: 'User does not exist' });
+  }
+
+  res.status(204).end();
+};
+
 module.exports = {
   registerUser,
   getAllUsers,
   getUserById,
+  deleteUser,
 };

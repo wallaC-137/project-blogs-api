@@ -20,11 +20,11 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
       },
       published: {
-        allowNull: false,
+        defaultValue: DataTypes.NOW,
         type: DataTypes.DATE,
       },
       updated: {
-        allowNull: false,
+        defaultValue: DataTypes.NOW,
         type: DataTypes.DATE,
       },
     },
@@ -47,6 +47,10 @@ module.exports = (sequelize, DataTypes) => {
       otherKey: 'categoryId',
     });
   };
+
+  BlogPost.addHook('beforeCreate', (post) => {
+    post.published = new Date();
+  });
 
   return BlogPost;
 };

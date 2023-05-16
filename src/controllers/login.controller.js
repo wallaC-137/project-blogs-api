@@ -1,5 +1,5 @@
 const { loginService } = require('../services');
-const generateToken = require('../jwt/generate.token');
+const { generateToken } = require('../auth/generate.token');
 
 const login = async (req, res) => {
   const { email, password } = req.body;
