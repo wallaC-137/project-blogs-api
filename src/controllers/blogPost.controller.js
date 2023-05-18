@@ -22,7 +22,7 @@ const createPost = async (req, res) => {
     return res.status(400).json({ message: 'Invalid fields' });
   }
 
-  const { userId } = verifyToken(authorization).data;
+  const { userId } = verifyToken(authorization);
 
   res.status(201).json({ ...blogPost.dataValues, userId });
 };
@@ -52,7 +52,7 @@ const updatePost = async (req, res) => {
 
   const blogPost = await blogPostService.updatePost(id, title, content);
 
-  const { userId } = verifyToken(authorization).data;
+  const { userId } = verifyToken(authorization);
 
   if (!blogPost[0] === 0) {
     return res.status(404).json({ message: 'Post does not exist' });
@@ -70,7 +70,7 @@ const updatePost = async (req, res) => {
 const deletePost = async (req, res) => {
   const { id } = req.params;
   const { authorization } = req.headers;
-  const { userId } = verifyToken(authorization).data;
+  const { userId } = verifyToken(authorization);
   
   const response = await blogPostService.getPostById(id);
 

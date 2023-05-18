@@ -1,11 +1,11 @@
-const { loginService } = require('../services');
+// const { User } = require('../models');
 
 const checkName = (value) => value && value.length < 8;
 const checkEmail = (value) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const checkPassword = (value) => value.length < 6;
-const checkEmailExists = async (value) => loginService.getByUsername(value);
+// const checkEmailExists = (email) => User.findOne({ where: { email } });
 
-const mandatoryFields = async (req, res, next) => {
+const inputFields = async (req, res, next) => {
   const { displayName, email, password } = req.body;
 
   if (checkName(displayName)) {
@@ -24,9 +24,9 @@ const mandatoryFields = async (req, res, next) => {
     });
   }
 
-  if (await checkEmailExists(email)) {
-    return res.status(409).json({ message: 'User already registered' });
-  }
+  // if (await checkEmailExists(email)) {
+  //   return res.status(409).json({ message: 'User already registered' });
+  // }
 
   next();
 };
@@ -42,6 +42,6 @@ const category = (req, res, next) => {
 };
 
 module.exports = {
-  mandatoryFields,
+  inputFields,
   category,
 };

@@ -16,9 +16,9 @@ const generateToken = (payload) => {
 
 const verifyToken = (token) => {
   try {
-    const decoded = jwt.verify(token, secret);
+    const { data } = jwt.verify(token, secret);
   
-    return decoded;
+    return data;
   } catch (error) {
     console.log('token error');
   }

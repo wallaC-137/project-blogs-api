@@ -3,44 +3,60 @@ const { generateToken, verifyToken } = require('../auth/generate.token');
 
 const registerUser = async (req, res) => {
   const { email, password, displayName, image } = req.body;
-  const user = await userServices.registerUser({
+  const { type, message } = await userServices.registerUser({
     displayName,
     email,
     password,
     image,
   });
-  const token = generateToken(user);
-  res.status(201).json({ token });
+
+  if (type === 409) {
+    return res.status(type).json({ message });
+  }
+
+  const token = generateToken(message);
+  res.status(type).json({ token });
 };
 
 const getAllUsers = async (_req, res) => {
-  const users = await userServices.getAllUsers();
-  res.status(200).json(users);
+  const { type, message } = await userServices.getAllUsers();
+  res.status(type).json(message);
 };
 
 const getUserById = async (req, res) => {
   const { id } = req.params;
-  const user = await userServices.getUserById(id);
+  const { type, message } = await userServices.getUserById(id);
 
-  if (!user) {
-    return res.status(404).json({ message: 'User does not exist' });
+  if (type === 404) {
+    return res.status(type).json({ message });
   }
 
-  res.status(200).json(user);
+  res.status(type).json(message);
 };
 
 const deleteUser = async (req, res) => {
   const { authorization } = req.headers;
 
-  const { userId } = verifyToken(authorization).data;
+  const { userId } = verifyToken(authorization);
 
-  const user = await userServices.deleteUser(userId);
+  const { type, message } = await userServices.deleteUser(userId);
 
-  if (!user) {
-    return res.status(404).json({ message: 'User does not exist' });
+  if (type === 404) {
+    return res.status(type).json({ message });
   }
 
-  res.status(204).end();
+  res.status(type).end();
+};
+
+const getByEmail = async (req, res) => {
+  const { email, password } = req.body;
+  const { type, message } = await userServices.getByEmail(email, password);
+
+  if (type === 400) {
+    return res.status(type).json({ message });
+  }
+
+  res.status(type).json({ token: message });
 };
 
 module.exports = {
@@ -48,4 +64,5 @@ module.exports = {
   getAllUsers,
   getUserById,
   deleteUser,
+  getByEmail,
 };

@@ -1,9 +1,18 @@
 const { Category } = require('../models');
 
 const createCategory = async (category) => {
-  const { name } = category;
-  const categoryCreated = await Category.create({ name });
-  return categoryCreated;
+  try {
+    const { name } = category;
+    const categoryCreated = await Category.create({ name });
+  
+    if (!categoryCreated) {
+      return { type: 400, message: 'Category already registered' };
+    }
+  
+    return { type: 201, message: categoryCreated };
+  } catch (err) {
+    console.error(err);
+  }
 };
 
 const getAllCategories = async () => {

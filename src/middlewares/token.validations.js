@@ -9,8 +9,7 @@ const checkToken = async (req, res, next) => {
   }
 
   try {
-    const secret = process.env.JWT_SECRET || 'tokenexample';
-    // const decoded = jwt.verify(token, secret);
+    const secret = process.env.JWT_SECRET;
     jwt.verify(token, secret);
     
     next();

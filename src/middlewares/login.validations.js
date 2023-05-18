@@ -1,8 +1,10 @@
-const mandatoryFields = (req, res, next) => {
-  const request = req.body;
-  const requiredFields = ['email', 'password'];
+const { validationInputs } = require('../utils'); 
 
-  const isMissingFields = requiredFields.some((field) => !request[field]);
+const inputFields = (req, res, next) => {
+  const request = req.body;
+  const inputs = ['email', 'password'];
+
+  const isMissingFields = validationInputs.mandatoryFields(inputs, request);
   if (isMissingFields) {
     return res
       .status(400)
@@ -12,6 +14,8 @@ const mandatoryFields = (req, res, next) => {
   next();
 };
 
+// inputFields
+
 module.exports = {
-  mandatoryFields,
+  inputFields,
 };

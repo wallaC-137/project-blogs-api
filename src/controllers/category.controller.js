@@ -2,13 +2,9 @@ const { categoryService } = require('../services');
 
 const createCategory = async (req, res) => {
   const { name } = req.body;
-  const category = await categoryService.createCategory({ name });
+  const { type, message } = await categoryService.createCategory({ name });
 
-  if (!category) {
-    return res.status(400).json({ message: 'Category already registered' });
-  }
-
-  res.status(201).json(category);
+  res.status(type).json(message);
 };
 
 const getAllCategories = async (_req, res) => {
