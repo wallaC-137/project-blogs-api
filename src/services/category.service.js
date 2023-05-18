@@ -10,14 +10,18 @@ const createCategory = async (category) => {
     }
   
     return { type: 201, message: categoryCreated };
-  } catch (err) {
-    console.error(err);
+  } catch (_err) {
+    console.error('Server Error');
   }
 };
 
 const getAllCategories = async () => {
-  const categories = await Category.findAll();
-  return categories;
+  try {
+    const categories = await Category.findAll();
+    return { type: 200, message: categories };
+  } catch (_err) {
+    console.error('Server Error');
+  }
 };
 
 module.exports = {

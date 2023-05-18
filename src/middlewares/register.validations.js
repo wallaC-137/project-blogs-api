@@ -1,9 +1,6 @@
-// const { User } = require('../models');
-
 const checkName = (value) => value && value.length < 8;
 const checkEmail = (value) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 const checkPassword = (value) => value.length < 6;
-// const checkEmailExists = (email) => User.findOne({ where: { email } });
 
 const inputFields = async (req, res, next) => {
   const { displayName, email, password } = req.body;
@@ -24,24 +21,9 @@ const inputFields = async (req, res, next) => {
     });
   }
 
-  // if (await checkEmailExists(email)) {
-  //   return res.status(409).json({ message: 'User already registered' });
-  // }
-
-  next();
-};
-
-const category = (req, res, next) => {
-  const { name } = req.body;
-
-  if (!name) {
-    return res.status(400).json({ message: '"name" is required' });
-  }
-
   next();
 };
 
 module.exports = {
   inputFields,
-  category,
 };

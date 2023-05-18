@@ -25,7 +25,7 @@ const getAllUsers = async () => {
   
     return { type: 200, message: users };
   } catch (_err) {
-    console.log('Error');
+    console.log('Server Error');
   }
 };
 
@@ -41,8 +41,8 @@ const getUserById = async (id) => {
     }
   
     return { type: 200, message: user };
-  } catch (err) {
-    console.log('Error');
+  } catch (_err) {
+    console.log('Server Error');
   }
 };
 
@@ -55,8 +55,8 @@ const deleteUser = async (id) => {
     }
   
     return { type: 204, message: '' };
-  } catch (err) {
-    console.log('Error');
+  } catch (_err) {
+    console.log('Server Error');
   }
 };
 
@@ -71,8 +71,8 @@ const getByEmail = async (email, password) => {
     const token = generateToken(user);
   
     return { type: 200, message: token };
-  } catch (error) {
-    console.log('Error');
+  } catch (_err) {
+    console.log('Server Error');
   }
 };
 

@@ -1,11 +1,11 @@
 const router = require('express').Router();
 const { categoryController } = require('../controllers');
-const { tokenValidation, userValidation } = require('../middlewares');
+const { tokenValidation, categoryValidation } = require('../middlewares');
 
 router.post(
   '/', 
   tokenValidation.checkToken, 
-  userValidation.category,
+  categoryValidation.inputFields,
   categoryController.createCategory,
 );
 router.get(
