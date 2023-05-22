@@ -1,48 +1,47 @@
-const { blogPostService } = require('../services');
+const { blogPostService, categoryService } = require('../services');
 const { verifyToken } = require('../auth/generate.token');
 
 const createPost = async (req, res) => {
   const { title, content, categoryIds } = req.body;
   const { authorization } = req.headers;
 
-  if (!title || !content || !categoryIds) {
-    return res.status(400).json({ message: 'Some required fields are missing' });
-  }
+  // if (!title || !content || !categoryIds) {
+  //   return res.status(400).json({ message: 'Some required fields are missing' });
+  // }
 
-  const getCategories = await Promise.all(categoryIds
-    .map((id) => blogPostService.getCategoryById(id)));
+  // const getCategories = await Promise.all(categoryIds
+  //   .map((id) => categoryService.getCategoryById(id)));
 
-  if (getCategories.includes(null)) {
-    return res.status(400).json({ message: 'one or more "categoryIds" not found' });
-  }
+  // if (getCategories.includes(null)) {
+  //   return res.status(400).json({ message: 'one or more "categoryIds" not found' });
+  // }
 
-  const blogPost = await blogPostService.createPost({ title, content, categoryIds });
+  const { type, message } = await blogPostService.createPost({ title, content, categoryIds });
 
-  if (!blogPost) {
-    return res.status(400).json({ message: 'Invalid fields' });
+  if (type !== 201) {
+    return res.status(type).json({ message });
   }
 
   const { userId } = verifyToken(authorization);
 
-  res.status(201).json({ ...blogPost.dataValues, userId });
+  res.status(201).json({ ...message, userId });
 };
 
 const getAllPosts = async (_req, res) => {
-  const blogPosts = await blogPostService.getAllPosts();
+  const { type, message } = await blogPostService.getAllPosts();
 
-  res.status(200).json(blogPosts);
-  res.status(200).end();
+  res.status(type).json(message);
 };
 
 const getPostById = async (req, res) => {
   const { id } = req.params;
-  const blogPost = await blogPostService.getPostById(id);
+  const { type, message } = await blogPostService.getPostById(id);
 
-  if (!blogPost) {
-    return res.status(404).json({ message: 'Post does not exist' });
+  if (type === 404) {
+    return res.status(type).json({ message });
   }
 
-  res.status(200).json(blogPost);
+  res.status(type).json(message);
 };
 
 const updatePost = async (req, res) => {
@@ -50,57 +49,36 @@ const updatePost = async (req, res) => {
   const { title, content } = req.body;
   const { authorization } = req.headers;
 
-  const blogPost = await blogPostService.updatePost(id, title, content);
-
   const { userId } = verifyToken(authorization);
 
-  if (!blogPost[0] === 0) {
-    return res.status(404).json({ message: 'Post does not exist' });
+  const { type, message } = await blogPostService.updatePost(id, title, content, userId);
+
+  if (type !== 200) {
+    return res.status(type).json({ message });
   }
 
-  const response = await blogPostService.getPostById(id);
-
-  if (response.userId !== userId) {
-    return res.status(401).json({ message: 'Unauthorized user' });
-  }
-
-  res.status(200).json(response);
+  res.status(type).json(message);
 };
 
 const deletePost = async (req, res) => {
   const { id } = req.params;
   const { authorization } = req.headers;
   const { userId } = verifyToken(authorization);
-  
-  const response = await blogPostService.getPostById(id);
 
-  if (!response) {
-    return res.status(404).json({ message: 'Post does not exist' });
+  const { type, message } = await blogPostService.deletePost(id, userId);
+  
+  if (type !== 204) {
+    return res.status(type).json({ message });
   }
 
-  // if (response.userId !== userId) {
-  //   // console.log('Unauthorized user');
-  //   console.log('entrou aqui');
-  //   return res.status(401).json({ message: 'Unauthorized user' });
-  // }
-  
-  const blogPost = await blogPostService.deletePost(id, userId);
-
-  console.log(blogPost === 0);
-  
-  if (!blogPost) {
-    return res.status(401).json({ message: 'Unauthorized user' });
-  }
-
-  res.status(204).end();
+  res.status(type).end();
 };
 
 const searchPost = async (req, res) => {
   const { q } = req.query;
-  console.log(true, 'aqui está ---------------- ', q);
-  const blogPosts = await blogPostService.searchPost(q);
+  const { type, message } = await blogPostService.searchPost(q);
 
-  res.status(200).json(blogPosts);
+  res.status(type).json(message);
 };
 
 module.exports = {

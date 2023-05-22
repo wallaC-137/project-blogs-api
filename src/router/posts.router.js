@@ -1,10 +1,11 @@
 const router = require('express').Router();
 const { blogPostController } = require('../controllers');
-const { tokenValidation, updateValidation } = require('../middlewares');
+const { tokenValidation, updateValidation, createPostValidation } = require('../middlewares');
 
 router.post(
   '/',
   tokenValidation.checkToken,
+  createPostValidation.inputFields,
   blogPostController.createPost,
 );
 router.get(

@@ -1,76 +1,124 @@
 const { Op } = require('sequelize');
-const { BlogPost, User, Category, PostCategory } = require('../models');
 
-const getCategoryById = async (id) => {
-  const category = await Category.findOne({ where: { id } });
-  return category;
+const { BlogPost, PostCategory } = require('../models');
+const { attributesFields } = require('../utils');
+
+const { getCategoryById } = require('./category.service');
+
+const checkExists = async (id) => {
+  try {
+    const blogPost = await BlogPost.findOne({
+      where: { id },
+      include: [
+        { ...attributesFields.fieldUser },
+        { ...attributesFields.fieldCategory },
+      ],
+    });
+    return blogPost;
+  } catch (_err) {
+    console.log('Server Error');
+  }
+};
+
+const createPostValidation = async (blogPost) => {
+  try {
+    const { title, content, categoryIds } = blogPost;
+   
+    const { id } = await BlogPost.create({ title, content });
+    categoryIds.forEach((categoryId) => {
+      PostCategory.create({ postId: id, categoryId });
+    });
+    
+    const blogPostCreated = await BlogPost.findOne({
+      where: { id },
+    });
+    
+    return blogPostCreated.dataValues;
+  } catch (error) {
+    console.log('Server Error');
+    return {};
+  }
 };
 
 const createPost = async (blogPost) => {
   const { title, content, categoryIds } = blogPost;
-  const { id } = await BlogPost.create({ title, content });
-  categoryIds.forEach((categoryId) => {
-    PostCategory.create({ postId: id, categoryId });
-  });
 
-  const blogPostCreated = await BlogPost.findOne({
-    where: { id },
-  });
+  const getCategories = await Promise.all(categoryIds
+    .map((id) => getCategoryById(id)));
+
+  if (getCategories.includes(null)) {
+    return { type: 400, message: 'one or more "categoryIds" not found' };
+  }
+
+  const blogPostCreated = await createPostValidation({ title, content, categoryIds });
   
-  return blogPostCreated;
+  if (!blogPostCreated) {
+    return { type: 400, message: 'Invalid fields' };
+  }
+
+  return { type: 201, message: blogPostCreated };
 };
 
 const getAllPosts = async () => {
   try {
     const blogPosts = await BlogPost.findAll({
       include: [
-        { model: User, as: 'user', attributes: { exclude: ['password'] } },
-        { model: Category,
-            as: 'categories',
-            through: { attributes: [] },
-            attributes: ['id', 'name'] },
+        { ...attributesFields.fieldUser },
+        { ...attributesFields.fieldCategory },
       ],
     });
-    return blogPosts;
+    return { type: 200, message: blogPosts };
   } catch (error) {
-    console.log(error);
+    console.log('Server Error');
   }
 };
 
 const getPostById = async (id) => {
-  const blogPost = await BlogPost.findOne({
-    where: { id },
-    include: [
-      { model: User, as: 'user', attributes: { exclude: ['password'] } },
-      { model: Category,
-          as: 'categories',
-          through: { attributes: [] },
-          attributes: ['id', 'name'] },
-    ],
-  });
-  return blogPost;
+  try {
+    const blogPost = await checkExists(id);
+
+    if (!blogPost) {
+      return { type: 404, message: 'Post does not exist' };
+    }
+
+    return { type: 200, message: blogPost };
+  } catch (error) {
+    console.log('Server Error');
+  }
 };
 
-const updatePost = async (id, title, content) => {
+const updatePost = async (id, title, content, userId) => {
   const blogPost = await BlogPost.update(
     { title, content },
     { where: { id } },
   );
-  return blogPost;
+
+  if (!blogPost[0] === 0) {
+    return { type: 404, message: 'Post does not exist' };
+  }
+
+  const response = await checkExists(id);
+
+  if (response.userId !== userId) {
+    return { type: 401, message: 'Unauthorized user' };
+  }
+
+  return { type: 200, message: response };
 };
 
 const deletePost = async (id, userId) => {
-  const blogPost = await BlogPost.destroy({ where: { id, userId } });
-  return blogPost;
-};
+  const response = await checkExists(id);
+  if (!response) {
+    return { type: 404, message: 'Post does not exist' };
+  }
 
-const test = {
-  fieldUser: { 
-    model: User, as: 'user', attributes: { exclude: ['password'] }, 
-  },
-  fieldCategory: {
-    model: Category, as: 'categories', through: { attributes: [] }, attributes: ['id', 'name'],
-  },
+  const blogPost = await BlogPost.destroy({ where: { id, userId } });
+  
+  if (!blogPost) {
+    return { type: 401, message: 'Unauthorized user' };
+  }
+
+  return { type: 204, message: '' };
 };
 
 const searchPost = async (searchTerm) => {
@@ -87,11 +135,11 @@ const searchPost = async (searchTerm) => {
 
    },
     include: [
-      { ...test.fieldUser },
-      { ...test.fieldCategory },
+      { ...attributesFields.fieldUser },
+      { ...attributesFields.fieldCategory },
     ],
   });
-  return blogPosts;
+  return { type: 200, message: blogPosts };
 };
 
 module.exports = {
@@ -101,5 +149,6 @@ module.exports = {
   updatePost,
   deletePost,
   searchPost,
-  getCategoryById,
+  checkExists,
+  createPostValidation,
 };

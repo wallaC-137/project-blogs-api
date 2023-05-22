@@ -24,7 +24,17 @@ const getAllCategories = async () => {
   }
 };
 
+const getCategoryById = async (id) => {
+  try {
+    const category = await Category.findOne({ where: { id } });
+    return category;
+  } catch (_err) {
+    console.log('Server Error');
+  }
+};
+
 module.exports = {
   createCategory,
   getAllCategories,
+  getCategoryById,
 };
