@@ -1,20 +1,9 @@
-const { blogPostService, categoryService } = require('../services');
+const { blogPostService } = require('../services');
 const { verifyToken } = require('../auth/generate.token');
 
 const createPost = async (req, res) => {
   const { title, content, categoryIds } = req.body;
   const { authorization } = req.headers;
-
-  // if (!title || !content || !categoryIds) {
-  //   return res.status(400).json({ message: 'Some required fields are missing' });
-  // }
-
-  // const getCategories = await Promise.all(categoryIds
-  //   .map((id) => categoryService.getCategoryById(id)));
-
-  // if (getCategories.includes(null)) {
-  //   return res.status(400).json({ message: 'one or more "categoryIds" not found' });
-  // }
 
   const { type, message } = await blogPostService.createPost({ title, content, categoryIds });
 
